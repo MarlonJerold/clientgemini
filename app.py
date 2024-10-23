@@ -4,10 +4,13 @@ import requests
 import os
 import logging
 from dotenv import load_dotenv
+from flask_cors import CORS  # Importe CORS
 
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/summarize_posts": {"origins": "https://milhonews.vercel.app"}})
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,7 +23,7 @@ genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
-@app.route('/summarize_posts', methods=['GET'])
+@app.route('/summarize_posts', methods=['GET']) 
 def summarize_posts():
     url = "https://milharal-news.onrender.com/service/RelevantPotopsts"
     
