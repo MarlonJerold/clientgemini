@@ -4,7 +4,7 @@ import requests
 import os
 import logging
 from dotenv import load_dotenv
-from flask_cors import CORS  # Importe CORS
+from flask_cors import CORS
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
-@app.route('/summarize_posts', methods=['GET']) 
+@app.route('/summarize_posts', methods=['GET'])
 def summarize_posts():
     url = "https://milharal-news.onrender.com/service/RelevantPotopsts"
     
@@ -44,7 +44,7 @@ def summarize_posts():
 
         post_texts_str = " ".join(post_texts)
 
-        prompt = f"Quero que você escreva um resumo em formato de jornal com base nos tópicos mais falados nos posts do Bluesky e da bolha dev. Transforme o conteúdo em um texto único, contínuo e interessante:\n\n{post_texts_str}"
+        prompt = f"Quero que você escreva um resumo em formato de jornal, mas o jornal é diário, então lembre que não é noticia da semana, mas sim do dia de hoje com base nos tópicos mais falados nos posts do Bluesky e da bolha dev, quero que o texto seja divido por tópicos. Transforme o conteúdo em um texto único, contínuo e interessante:\n\n{post_texts_str}"
 
         summary_response = model.generate_content([prompt])
 
