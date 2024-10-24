@@ -44,7 +44,7 @@ def summarize_posts():
 
         post_texts_str = " ".join(post_texts)
 
-        prompt = f"Receba os dados dos feeds extraídos de hoje do Bluesky, focados nas discussões mais relevantes da comunidade de desenvolvedores, e crie uma matéria em formato de quatro tirinhas de resumo. Cada tirinha deve cobrir um tópico específico, reunindo diferentes posts e opiniões que se complementam ou contrastam, como se fosse uma conversa entre vários usuários. As tirinhas podem cobrir temas como novidades tecnológicas, debates sobre práticas de desenvolvimento, novas ferramentas, ou tendências emergentes. O texto deve ser fluido e interconectado, destacando os principais pontos discutidos em cada tópico e oferecendo uma visão coesa e interessante sobre o que foi falado hoje:\n\n{post_texts_str}"
+        prompt = f"Receba os dados dos feeds de hoje do Bluesky, focados nas discussões mais populares entre desenvolvedores, e crie uma matéria jornalística dividida em quatro seções, cada uma abordando um tema relevante do dia. Cada seção deve sintetizar e interligar as postagens, apresentando as interações e opiniões dos usuários de forma fluida, como uma notícia, e cobrindo tópicos como debates sobre desafios de desenvolvimento (ex: 'O Desafio do Dev Marombas'), novidades em ferramentas de programação, insights sobre produtividade, ou tendências emergentes no setor. O tom deve ser jornalístico, informando de maneira coesa e interessante sobre o que foi discutido hoje:\n\n{post_texts_str}"
 
         summary_response = model.generate_content([prompt])
 
