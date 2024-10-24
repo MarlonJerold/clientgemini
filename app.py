@@ -10,7 +10,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/summarize_posts": {"origins": "https://news.milho.site"}})
+CORS(app, resources={r"/summarize_posts": {"origins": "https://milhonews.vercel.app"}})
 
 logging.basicConfig(level=logging.INFO)
 
