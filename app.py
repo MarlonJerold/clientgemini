@@ -10,7 +10,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/summarize_posts": {"origins": "https://news.milho.site"}})
+CORS(app, resources={r"/summarize_posts": {"origins": "https://milhonews.vercel.app"}})
 
 logging.basicConfig(level=logging.INFO)
 
@@ -44,7 +44,7 @@ def summarize_posts():
 
         post_texts_str = " ".join(post_texts)
 
-        prompt = f"Quero que você escreva um resumo em formato de jornal, mas o jornal é diário, então lembre que não é noticia da semana, mas sim do dia de hoje com base nos tópicos mais falados nos posts do Bluesky e da bolha dev, quero que o texto seja divido por tópicos. Transforme o conteúdo em um texto único, contínuo e interessante:\n\n{post_texts_str}"
+        prompt = f"Crie um resumo no formato de um jornal diário, focando nos assuntos mais comentados do dia de hoje, com base nas postagens mais relevantes do Bluesky, especialmente dentro da comunidade de desenvolvedores. O texto deve ser bem organizado e dividido por seções, refletindo temas e tópicos que emergiram ao longo do dia, como tendências tecnológicas, debates sobre programação, novidades em frameworks, dicas de produtividade e insights sobre carreira. O objetivo é transformar o conteúdo dessas discussões em um relato fluido e envolvente, que mantenha o leitor atualizado sobre os acontecimentos mais quentes no mundo dev de maneira clara e interessante. Evite um tom excessivamente técnico, mas mantenha um nível adequado de profundidade, para atrair tanto leitores mais experientes quanto os que estão começando, utilize esses posts para fazer isso possível:\n\n{post_texts_str}"
 
         summary_response = model.generate_content([prompt])
 
