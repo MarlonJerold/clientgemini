@@ -44,7 +44,7 @@ def summarize_posts():
 
         post_texts_str = " ".join(post_texts)
 
-        prompt = f"Quero que você escreva um resumo em formato de jornal, mas o jornal é diário, então lembre que não é noticia da semana, mas sim do dia de hoje com base nos tópicos mais falados nos posts do Bluesky e da bolha dev, quero que o texto seja divido por tópicos. Transforme o conteúdo em um texto único, contínuo e interessante:\n\n{post_texts_str}"
+        prompt = f"Receba os dados dos feeds de hoje do Bluesky, focados nas discussões mais populares entre desenvolvedores, e crie uma matéria jornalística dividida em quatro seções, cada uma abordando um tema relevante do dia. Cada seção deve sintetizar e interligar as postagens, apresentando as interações e opiniões dos usuários de forma fluida, como uma notícia, e cobrindo tópicos como debates sobre desafios de desenvolvimento (ex: 'O Desafio do Dev Marombas'), novidades em ferramentas de programação, insights sobre produtividade, ou tendências emergentes no setor. O tom deve ser jornalístico, informando de maneira coesa e interessante sobre o que foi discutido hoje:\n\n{post_texts_str}"
 
         summary_response = model.generate_content([prompt])
 
