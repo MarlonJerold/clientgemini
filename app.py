@@ -62,5 +62,71 @@ def summarize_posts():
         logging.error(f"Erro inesperado: {e}")
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/get_sub_reddit', methods=['GET'])
+def get_sub_reddit():
+    subreddit = "programming"
+    url = f"https://www.reddit.com/r/{subreddit}/.json"
+    headers = {'User-Agent': 'BotMilhoNews/0.0.1'}
+
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            return jsonify({"error": "Falha ao acessar a API do Reddit"}), response.status_code
+        
+        data = response.json()
+        
+        posts_data = []
+        posts = data.get("data", {}).get("children", [])
+        for post in posts:
+            post_info = post["data"]
+            post_permalink = post_info["permalink"]
+            post_url = f"https://www.reddit.com{post_permalink}.json"
+            
+            posts_data.append({
+                "title": post_info["title"],
+                "url": post_url
+            })
+            
+            post_response = requests.get(post_url, headers=headers)
+            if post_response.status_code == 200:
+                post_data = post_response.json()
+                
+                comments_data = []
+                comments = post_data[1].get("data", {}).get("children", [])
+                for comment in comments:
+                    if comment["kind"] == "t1": 
+                        author = comment["data"]["author"]
+                        body = comment["data"]["body"]
+                        score = comment["data"]["score"]
+                        comment_info = {
+                            "author": author,
+                            "body": body,
+                            "score": score
+                        }
+                        comments_data.append(comment_info)
+                        
+                        replies = comment["data"].get("replies")
+                        if replies:
+                            reply_data = []
+                            for reply in replies["data"]["children"]:
+                                if reply["kind"] == "t1":  
+                                    reply_author = reply["data"]["author"]
+                                    reply_body = reply["data"]["body"]
+                                    reply_data.append({
+                                        "reply_author": reply_author,
+                                        "reply_body": reply_body
+                                    })
+                            comment_info["replies"] = reply_data
+                
+                posts_data[-1]["comments"] = comments_data
+            else:
+                posts_data[-1]["comments"] = [{"error": "Falha ao obter comentários"}]
+
+        return jsonify(posts_data)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
