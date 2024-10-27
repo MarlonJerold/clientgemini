@@ -67,7 +67,7 @@ def summarize_posts():
 def get_sub_reddit():
     subreddit = "programming"
     url = f"https://www.reddit.com/r/{subreddit}/.json"
-    headers = {'User-Agent': 'BotMilhoNews/0.0.1 (news for the open source community Milharal dos Devs from Brazil)'}
+    headers = {'User-Agent: MyAwesomeApp/1.0 (MilhoNews Bot for the open source community)'}
 
     try:
         response = requests.get(url, headers=headers)
