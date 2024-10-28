@@ -67,7 +67,7 @@ def summarize_posts():
 def get_sub_reddit():
     subreddit = "programming"
     url = f"https://www.reddit.com/r/{subreddit}/.json"
-    headers = {'User-Agent: MyAwesomeApp/1.0 (MilhoNews Bot for the open source community)'}
+    headers = {'User-Agent': 'MyAwesomeApp/1.0 (MilhoNews Bot for the open source community)'}  # Corrigido o cabeçalho
 
     try:
         response = requests.get(url, headers=headers)
@@ -107,7 +107,7 @@ def get_sub_reddit():
                         comments_data.append(comment_info)
                         
                         replies = comment["data"].get("replies")
-                        if replies:
+                        if replies and isinstance(replies, dict):  # Verifique se replies é um dicionário
                             reply_data = []
                             for reply in replies["data"]["children"]:
                                 if reply["kind"] == "t1":  
