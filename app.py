@@ -62,13 +62,13 @@ def summarize_posts():
         logging.error(f"Erro inesperado: {e}")
         return jsonify({"error": str(e)}), 500
 
-
+  
 @app.route('/get_sub_reddit', methods=['GET'])
 def get_sub_reddit():
     subreddit = "programming"
     url = f"https://www.reddit.com/r/{subreddit}/.json"
-    headers = {'User-Agent': 'MyAwesomeApp/1.0 (MilhoNews Bot for the open source community)'}  # Corrigido o cabeçalho
-
+    headers = {'User-Agent': 'milhonews/1.0 (The Reddit Post Fetcher is a simple and effective application that allows the retrieval of valuable information from the Reddit platform. With a design focused on simplicity and functionality, the application serves as an excellent foundation for future expansions and improvements.)', 'Authorization': 'Bearer REDDIT_API_KEY'}
+    
     try:
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
@@ -127,6 +127,6 @@ def get_sub_reddit():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
 if __name__ == '__main__':
     app.run(debug=True)
