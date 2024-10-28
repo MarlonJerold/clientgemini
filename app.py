@@ -5,6 +5,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from flask_cors import CORS
+import praw
 
 load_dotenv()
 
@@ -62,71 +63,61 @@ def summarize_posts():
         logging.error(f"Erro inesperado: {e}")
         return jsonify({"error": str(e)}), 500
 
-  
+reddit = praw.Reddit(
+    REDDIT_CLIENT_ID='YOUR_CLIENT_ID',
+    client_secret='REDDIT_CLIENT_SECRET',
+    user_agent='USER_AGENT',
+    username='REDDIT_USERNANE',
+    password='REDDIT_PASSWORD'
+)
+
 @app.route('/get_sub_reddit', methods=['GET'])
 def get_sub_reddit():
     subreddit = "programming"
-    url = f"https://www.reddit.com/r/{subreddit}/.json"
-    headers = {'User-Agent': 'milhonews/1.0 (The Reddit Post Fetcher is a simple and effective application that allows the retrieval of valuable information from the Reddit platform. With a design focused on simplicity and functionality, the application serves as an excellent foundation for future expansions and improvements.)', 'Authorization': 'Bearer REDDIT_API_KEY'}
-    
+
     try:
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            return jsonify({"error": "Falha ao acessar a API do Reddit"}), response.status_code
-        
-        data = response.json()
-        
+        subreddit_data = reddit.subreddit(subreddit).hot(limit=10)
         posts_data = []
-        posts = data.get("data", {}).get("children", [])
-        for post in posts:
-            post_info = post["data"]
-            post_permalink = post_info["permalink"]
-            post_url = f"https://www.reddit.com{post_permalink}.json"
-            
+
+        for post in subreddit_data:
+            post_url = post.url  # URL do post
+
             posts_data.append({
-                "title": post_info["title"],
+                "title": post.title,
                 "url": post_url
             })
-            
-            post_response = requests.get(post_url, headers=headers)
-            if post_response.status_code == 200:
-                post_data = post_response.json()
-                
-                comments_data = []
-                comments = post_data[1].get("data", {}).get("children", [])
-                for comment in comments:
-                    if comment["kind"] == "t1": 
-                        author = comment["data"]["author"]
-                        body = comment["data"]["body"]
-                        score = comment["data"]["score"]
-                        comment_info = {
-                            "author": author,
-                            "body": body,
-                            "score": score
-                        }
-                        comments_data.append(comment_info)
-                        
-                        replies = comment["data"].get("replies")
-                        if replies and isinstance(replies, dict):  # Verifique se replies é um dicionário
-                            reply_data = []
-                            for reply in replies["data"]["children"]:
-                                if reply["kind"] == "t1":  
-                                    reply_author = reply["data"]["author"]
-                                    reply_body = reply["data"]["body"]
-                                    reply_data.append({
-                                        "reply_author": reply_author,
-                                        "reply_body": reply_body
-                                    })
-                            comment_info["replies"] = reply_data
-                
-                posts_data[-1]["comments"] = comments_data
-            else:
-                posts_data[-1]["comments"] = [{"error": "Falha ao obter comentários"}]
+
+            post.comments.replace_more(limit=0)  
+            comments_data = []
+
+            for comment in post.comments.list():
+                if isinstance(comment, praw.models.Comment):  
+                    comment_info = {
+                        "author": comment.author.name if comment.author else "[deleted]",
+                        "body": comment.body,
+                        "score": comment.score
+                    }
+                    comments_data.append(comment_info)
+
+                    # Opcional: adicionar respostas aos comentários, se necessário
+                    if comment.replies:
+                        reply_data = []
+                        for reply in comment.replies:
+                            reply_info = {
+                                "reply_author": reply.author.name if reply.author else "[deleted]",
+                                "reply_body": reply.body
+                            }
+                            reply_data.append(reply_info)
+                        comment_info["replies"] = reply_data
+
+            posts_data[-1]["comments"] = comments_data
 
         return jsonify(posts_data)
-    
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
     
 if __name__ == '__main__':
     app.run(debug=True)
