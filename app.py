@@ -25,7 +25,7 @@ model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
 @app.route('/summarize_posts', methods=['GET'])
 def summarize_posts():
-    url = "https://milharal-news.onrender.com/service/RelevantPotopsts"
+    url = "https://milharal-news.onrender.com/service/RelevantPosts"
     
     try:
         response = requests.get(url)
