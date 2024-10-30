@@ -45,7 +45,7 @@ def summarize_posts():
 
         post_texts_str = " ".join(post_texts)
 
-        prompt = f"Receba os dados dos feeds de hoje do Bluesky, focados nas discussões mais populares entre desenvolvedores, e crie uma matéria jornalística dividida em quatro seções, cada uma abordando um tema relevante do dia. Cada seção deve sintetizar e interligar as postagens, apresentando as interações e opiniões dos usuários de forma fluida, como uma notícia, e cobrindo tópicos como debates sobre desafios de desenvolvimento (ex: 'O Desafio do Dev Marombas'), novidades em ferramentas de programação, insights sobre produtividade, ou tendências emergentes no setor. O tom deve ser jornalístico, informando de maneira coesa e interessante sobre o que foi discutido hoje:\n\n{post_texts_str}"
+        prompt = f"Receba os dados dos feeds de hoje do Bluesky, focados nas discussões mais populares entre desenvolvedores, e crie uma matéria jornalística dividida em seis seções, cada uma abordando um tema relevante do dia. Cada seção deve sintetizar e interligar as postagens, apresentando as interações e opiniões dos usuários de forma fluida, como uma notícia, e cobrindo tópicos como debates sobre desafios de desenvolvimento (ex: 'O Desafio do Dev Marombas'), novidades em ferramentas de programação, insights sobre produtividade, ou tendências emergentes no setor. O tom deve ser jornalístico, informando de maneira coesa e interessante sobre o que foi discutido hoje:\n\n{post_texts_str}"
 
         summary_response = model.generate_content([prompt])
 
@@ -63,61 +63,5 @@ def summarize_posts():
         logging.error(f"Erro inesperado: {e}")
         return jsonify({"error": str(e)}), 500
 
-reddit = praw.Reddit(
-    REDDIT_CLIENT_ID='YOUR_CLIENT_ID',
-    client_secret='REDDIT_CLIENT_SECRET',
-    user_agent='USER_AGENT',
-    username='REDDIT_USERNANE',
-    password='REDDIT_PASSWORD'
-)
-
-@app.route('/get_sub_reddit', methods=['GET'])
-def get_sub_reddit():
-    subreddit = "programming"
-
-    try:
-        subreddit_data = reddit.subreddit(subreddit).hot(limit=10)
-        posts_data = []
-
-        for post in subreddit_data:
-            post_url = post.url  # URL do post
-
-            posts_data.append({
-                "title": post.title,
-                "url": post_url
-            })
-
-            post.comments.replace_more(limit=0)  
-            comments_data = []
-
-            for comment in post.comments.list():
-                if isinstance(comment, praw.models.Comment):  
-                    comment_info = {
-                        "author": comment.author.name if comment.author else "[deleted]",
-                        "body": comment.body,
-                        "score": comment.score
-                    }
-                    comments_data.append(comment_info)
-
-                    # Opcional: adicionar respostas aos comentários, se necessário
-                    if comment.replies:
-                        reply_data = []
-                        for reply in comment.replies:
-                            reply_info = {
-                                "reply_author": reply.author.name if reply.author else "[deleted]",
-                                "reply_body": reply.body
-                            }
-                            reply_data.append(reply_info)
-                        comment_info["replies"] = reply_data
-
-            posts_data[-1]["comments"] = comments_data
-
-        return jsonify(posts_data)
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-    
 if __name__ == '__main__':
     app.run(debug=True)
