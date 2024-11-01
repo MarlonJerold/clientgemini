@@ -10,7 +10,10 @@ load_dotenv()
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/summarize_posts": {"origins": "https://www.milho.site"}})
+CORS(app, resources={
+    r"/summarize_posts": {"origins": ["https://www.milho.site"]},
+    r"/verify_opportunity": {"origins": ["https://milharal-news.onrender.com"]}
+})
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,10 +25,38 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+@app.route('/verify_opportunity', methods=['GET'])
+def verify_opportunity():
+    try:
+    
+        post_text = request.args.get("text")
+
+        if not post_text:
+            return jsonify({"error": "Texto do post não fornecido."}), 400
+
+        prompt = f"Esse texto refere-se a uma pessoa anunciando vaga de emprego? pode ser da empresa dela ou de outra empresa, tem que ser um anúncio, tem que ser emprego e não vaga de cursos!! Responda apenas com '{{\"is_opportunity\": true}}' ou '{{\"is_not_opportunity\": false}}' conforme apropriado:\n\n\"{post_text}\""
+
+        verification_response = model.generate_content([prompt])
+
+        if verification_response and verification_response.candidates:
+            response_text = verification_response.candidates[0].content.parts[0].text.strip().lower()
+
+            if "true" in response_text:
+                return jsonify({"is_opportunity": True})
+            elif "false" in response_text:
+                return jsonify({"is_opportunity": False})
+            else:
+                return jsonify({"error": "Resposta inesperada do modelo."}), 500
+        else:
+            return jsonify({"error": "Nenhum conteúdo gerado."}), 500
+
+    except Exception as e:
+        logging.error(f"Erro inesperado: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/summarize_posts', methods=['GET'])
 def summarize_posts():
-    url = "https://milharal-news.onrender.com/service/RelevantPotopsts"
+    url = "https://milharal-news.onrender.com/service/RelevantPosts"
     
     try:
         response = requests.get(url)
@@ -44,7 +75,7 @@ def summarize_posts():
 
         post_texts_str = " ".join(post_texts)
 
-        prompt = f"Receba os dados dos feeds de hoje do Bluesky, focados nas discussões mais populares entre desenvolvedores, e crie uma matéria jornalística dividida em seis seções, cada uma abordando um tema relevante do dia. Cada seção deve sintetizar e interligar as postagens, apresentando as interações e opiniões dos usuários de forma fluida, como uma notícia, e cobrindo tópicos como debates sobre desafios de desenvolvimento (ex: 'O Desafio do Dev Marombas'), novidades em ferramentas de programação, insights sobre produtividade, ou tendências emergentes no setor. O tom deve ser jornalístico, informando de maneira coesa e interessante sobre o que foi discutido hoje:\n\n{post_texts_str}"
+        prompt = f"Receba os dados dos feeds de hoje do Bluesky, focados nas discussões mais populares entre desenvolvedores, e crie uma matéria jornalística dividida em 10 seções, , você terá uma introdução do que aconteceu na bolha dev de mais importante e depois considerações finais do que rolou, cada uma abordando um tema relevante do dia. Cada seção deve sintetizar e interligar as postagens, apresentando as interações e opiniões dos usuários de forma fluida, como uma notícia, e cobrindo tópicos como debates sobre desafios de desenvolvimento (ex: 'O Desafio do Dev Marombas'), novidades em ferramentas de programação, insights sobre produtividade, ou tendências emergentes no setor. O tom deve ser jornalístico, informando de maneira coesa e interessante sobre o que foi discutido hoje :\n\n{post_texts_str}"
 
         summary_response = model.generate_content([prompt])
 
