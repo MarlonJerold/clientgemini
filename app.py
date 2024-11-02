@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 CORS(app, resources={
     r"/summarize_posts": {"origins": ["https://www.milho.site"]},
-    r"/verify_opportunity": {"origins": ["https://milharal-news.onrender.com"]}
+    r"/is_opportunity": {"origins": ["https://milharal-news.onrender.com"]}
 })
 
 logging.basicConfig(level=logging.INFO)
@@ -25,8 +25,8 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-@app.route('/verify_opportunity', methods=['GET'])
-def verify_opportunity():
+@app.route('/is_opportunity', methods=['GET'])
+def is_opportunity():
     try:
     
         post_text = request.args.get("text")
@@ -34,8 +34,7 @@ def verify_opportunity():
         if not post_text:
             return jsonify({"error": "Texto do post não fornecido."}), 400
 
-        prompt = f"Esse texto refere-se a uma pessoa anunciando vaga de emprego? pode ser da empresa dela ou de outra empresa, tem que ser um anúncio, tem que ser emprego e não vaga de cursos!! Responda apenas com '{{\"is_opportunity\": true}}' ou '{{\"is_not_opportunity\": false}}' conforme apropriado:\n\n\"{post_text}\""
-
+        prompt = f"Este texto refere-se a um anúncio de vaga de emprego? Ele deve claramente se referir a uma oportunidade de trabalho em uma empresa, e não pode ser sobre cursos ou treinamentos. Responda apenas com '{{\"is_opportunity\": true}}' se for um anúncio de emprego, ou '{{\"is_not_opportunity\": false}}' se não for:\n\n\"{post_text}\""
         verification_response = model.generate_content([prompt])
 
         if verification_response and verification_response.candidates:
