@@ -55,7 +55,7 @@ def is_opportunity():
 
 @app.route('/summarize_posts', methods=['GET'])
 def summarize_posts():
-    url = "https://milharal-news.onrender.com/service/RelevantPosts"
+    url = "https://milharal-news.onrender.com/post"
     
     try:
         response = requests.get(url)
